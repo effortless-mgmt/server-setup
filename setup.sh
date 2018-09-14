@@ -38,12 +38,6 @@ running "Upgrading distro"
 sudo apt-get dist-upgrade -y
 ok
 
-if questionY "Do you want to set the default text editor"
-then
-    bot "Set the default text editor"
-    sudo update-alternatives --config editor
-fi
-
 #####
 # Install Docker
 #####
@@ -80,6 +74,12 @@ ok
 #####
 # Set hostname
 #####
+
+if questionY "Do you want to set the default text editor"
+then
+    bot "Set the default text editor"
+    sudo update-alternatives --config editor
+fi
 
 bot "We need to set the FQDN for the server."
 read -ep "Enter FQDN: " fqdn
@@ -119,7 +119,7 @@ then
         touch /home/$username/.ssh/authorized_keys && \
         chmod 600 /home/$username/.ssh/authorized_keys
     
-    sudo chmod -R $username:$username /home/$username/.ssh
+    sudo chown -R $username:$username /home/$username/.ssh
     
     read -ep "Enter SSH public key:" pubkey
     echo $pubkey >> /home/$username/.ssh/authorized_keys
