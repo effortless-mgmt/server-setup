@@ -45,20 +45,6 @@ then
 fi
 
 #####
-# Set hostname
-#####
-
-bot "We need to set the FQDN for the server."
-read -ep "Enter FQDN: " fqdn
-ok "Using $fqdn"
-
-sudo hostname $fqdn
-echo $fqdn > /etc/hostname
-echo "127.0.0.1 \t$fqdn" >> /etc/hosts
-
-ok "Hostname and record in local hosts file have been set."
-
-#####
 # Install Docker
 #####
 
@@ -78,7 +64,7 @@ ok
 running "Updating repository list"
 sudo apt-get update
 running "Installing Docker-CE"
-sudo apt-get install docker-ce
+sudo apt-get install -y docker-ce
 ok
 
 bot "Testing that Docker works:"
@@ -92,10 +78,24 @@ sudo docker images -q | xargs sudo docker rmi
 ok
 
 #####
+# Set hostname
+#####
+
+bot "We need to set the FQDN for the server."
+read -ep "Enter FQDN: " fqdn
+ok "Using $fqdn"
+
+sudo hostname $fqdn
+echo $fqdn > /etc/hostname
+echo "127.0.0.1 \t$fqdn" >> /etc/hosts
+
+ok "Hostname and record in local hosts file have been set."
+
+#####
 # Add an administrator user
 #####
 
-if ! grep -q admin /etc/group
+if ! grep -q "^admin:" /etc/group
 then
     running "Creating group 'admin'"
     sudo groupadd admin
@@ -104,7 +104,7 @@ fi
 if questionY "Do you wish to create a new administrator (sudo) user" 
 then
     read -ep "Enter username: " username
-    sudo useradd --groups admin,docker --create-home $username
+    sudo useradd -m -G admin,docker $username
     # Check if user/.ssh exist
     [[ ! -d /home/$username/.ssh ]] && \
         mkdir /home/$username/.ssh && \
