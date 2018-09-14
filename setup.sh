@@ -108,7 +108,7 @@ fi
 if questionY "Do you wish to create a new administrator (sudo) user" 
 then
     read -ep "Enter username: " username
-    sudo useradd -m -G admin,docker $username
+    sudo useradd -m -G admin,docker -s /bin/bash $username
     sudo passwd $username
     # Check if user/.ssh exist
     [[ ! -d /home/$username/.ssh ]] && \
