@@ -91,6 +91,9 @@ echo "127.0.0.1 \t$fqdn" >> /etc/hosts
 
 ok "Hostname and record in local hosts file have been set."
 
+bot "Changing locale to en_GB"
+sudo update-locale LC_ALL=en_GB.UTF-8 LANG=en_GB.UTF-8
+
 #####
 # Add an administrator user
 #####
@@ -99,12 +102,14 @@ if ! grep -q "^admin:" /etc/group
 then
     running "Creating group 'admin'"
     sudo groupadd admin
+    ok
 fi
 
 if questionY "Do you wish to create a new administrator (sudo) user" 
 then
     read -ep "Enter username: " username
     sudo useradd -m -G admin,docker $username
+    sudo passwd $username
     # Check if user/.ssh exist
     [[ ! -d /home/$username/.ssh ]] && \
         mkdir /home/$username/.ssh && \
@@ -114,8 +119,19 @@ then
         touch /home/$username/.ssh/authorized_keys && \
         chmod 600 /home/$username/.ssh/authorized_keys
     
+    sudo chmod -R $username:$username /home/$username/.ssh
+    
     read -ep "Enter SSH public key:" pubkey
     echo $pubkey >> /home/$username/.ssh/authorized_keys
+
+    if questionY "Do you have a dotfiles repository hosted on GitHub"
+    then
+        bot "I need to know username and repository, i.e. algorythm/dotfiles."
+        read -ep "Enter username and repository: " userrepo
+        running "Downloading to /home/$username/dotfiles"
+        git clone https://github.com/$userrepo /home/$username/dotfiles
+        ok
+    fi
 else
     echo skipping
 fi
