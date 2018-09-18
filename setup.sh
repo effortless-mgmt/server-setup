@@ -135,6 +135,7 @@ then
         read -ep "Enter username and repository: " userrepo
         running "Downloading to /home/$username/dotfiles"
         git clone https://github.com/$userrepo /home/$username/dotfiles
+        sudo chown -R $username:$username /home/$username/dotfiles
         ok
     fi
 else
